@@ -6,7 +6,7 @@ Day 2: Inventory Management System
 from collections import Counter
 
 linesin = []
-for line in open('02_input','r'):
+for line in open('inputs/02.input','r'):
     if line.strip():
         linesin.append(line.strip())
 

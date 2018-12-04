@@ -2,7 +2,7 @@
 import numpy as np
 
 in_lines = []
-for line in open('03.input','r'):
+for line in open('inputs/03.input','r'):
     if line:
         in_lines.append(line.strip().split(' '))
 

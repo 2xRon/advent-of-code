@@ -5,7 +5,7 @@ Day 1: Chronal Calibration
 '''
 
 output1 = []
-for line in open('01_input','r'):
+for line in open('inputs/01.input','r'):
     if line.strip():
         output1.append(int(line))
     

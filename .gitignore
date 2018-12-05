@@ -7,3 +7,5 @@ __pycache__/
 *.so
 
 *.input
+.gitignore
+*.secret

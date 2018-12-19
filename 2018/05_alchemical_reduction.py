@@ -20,15 +20,12 @@ def react_polymer(polymer):
         if polymer == polymer_new:
             break
         polymer = polymer_new
-    polymer = polymer[:-1]
-    return polymer
+    return polymer[:-1]
 # part 1
 print(len(react_polymer(polymer)))
 
 # part 2
 charset = set(c for c in polymer.lower())
-out = min(len(react_polymer( polymer.replace(c,'').replace(c.upper(),'') )) for c in charset)
-
-print(out)
+print(min(len(react_polymer( polymer.replace(c,'').replace(c.upper(),'') )) for c in charset))
 
 

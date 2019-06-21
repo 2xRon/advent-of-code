@@ -1,12 +1,12 @@
-'''
+"""
 ADVENT OF CODE: 2018
 Day 2: Inventory Management System
-'''
+"""
 
 from collections import Counter
 
 linesin = []
-for line in open('inputs/02.input','r'):
+for line in open("inputs/02.input", "r"):
     if line.strip():
         linesin.append(line.strip())
 
@@ -20,16 +20,16 @@ for id_count in lettercounts:
     if 3 in id_count.values():
         count3 += 1
 
-print(count2*count3)
+print(count2 * count3)
 
 
 unique_modified_ids = set()
 for id in linesin:
     for c_pos in range(len(id)):
-        t = ''.join(id[0:c_pos]+'_'+id[c_pos+1:])
+        t = "".join(id[0:c_pos] + "_" + id[c_pos + 1 :])
         if t in unique_modified_ids:
             # found duplicate
-            result = ''.join(id[0:c_pos]+id[c_pos+1:])
+            result = "".join(id[0:c_pos] + id[c_pos + 1 :])
         else:
             unique_modified_ids.add(t)
 print(result)

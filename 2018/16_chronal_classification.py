@@ -15,10 +15,15 @@ with open("inputs/16_1.input") as in_file:
     observations_strs = re.findall(observation_search, in_file.read())
 
 with open("inputs/16_2.input") as in_file:
-    instructions = [list(map(int,x.split(" "))) for x in re.findall(r"\d+ \d \d \d", in_file.read())]
+    instructions = [
+        list(map(int, x.split(" ")))
+        for x in re.findall(r"\d+ \d \d \d", in_file.read())
+    ]
+
 
 def split_int(seq, split_str=" "):
     return list(int(c) for c in seq.split(split_str))
+
 
 observation = namedtuple("observation", ["before", "instruction", "after"])
 observations = [
@@ -95,6 +100,10 @@ class SIM(CPU):
     def test_eval(self, op, A, B, C):
         return SIM(self.mem).eval(op, A, B, C)
 
+    def opcode_eval(self, op, A, B, C):
+        """opcode evaluation is patched in below after the mapping is worked out"""
+        pass
+
     def __repr__(self):
         return str(self.mem)
 
@@ -106,15 +115,38 @@ class SIM(CPU):
 
 
 matching_operations_per_observation = list()
-matching_operations_per_opcode = {x:set(operations) for x in range(16)}
+opcodes = {x: set(operations) for x in range(16)}
 for obs in observations:
     matching_operations = [
-            f
-            for f in operations
-            if SIM(obs.before).eval(f, *obs.instruction[1:]) == obs.after
-        ]
+        f
+        for f in operations
+        if SIM(obs.before).eval(f, *obs.instruction[1:]) == obs.after
+    ]
     matching_operations_per_observation.append(matching_operations)
-    matching_operations_per_opcode[obs.instruction[0]] &= set(matching_operations)
+    # set intersection
+    opcodes[obs.instruction[0]] &= set(matching_operations)
+
+
+removed_matches = []
+while any(len(names) != 1 for names in opcodes.values()):
+    for code in opcodes.keys():
+        if code not in removed_matches and len(opcodes[code]) == 1:
+            for code_j in opcodes.keys():
+                if code_j == code:
+                    continue
+                opcodes[code_j] -= opcodes[code]
+            removed_matches.append(code)
+opcodes = {code: names.pop() for code, names in opcodes.items()}
+
+# monkey patching sillyness :P
+def opcode_eval(self, op, A, B, C):
+    self.eval(opcodes[op], A, B, C)
+
+
+SIM.opcode_eval = opcode_eval
 
 print("Part 1:", sum(len(x) >= 3 for x in matching_operations_per_observation))
-print(matching_operations_per_opcode)
+my_cpu = SIM()
+for instruction in instructions:
+    my_cpu.opcode_eval(*instruction)
+print("Part 2:", my_cpu.mem[0])

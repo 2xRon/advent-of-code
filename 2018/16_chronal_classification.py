@@ -5,24 +5,23 @@ Day 16: Chronal Classification
 
 import re
 from collections import Counter, namedtuple
-from copy import deepcopy, copy
+from copy import copy
+
+
+def split_int(seq, split_str=" "):
+    return list(int(c) for c in seq.split(split_str))
+
 
 observation_search = re.compile(
     r"Before: \[(\d, \d, \d, \d)\].(\d+ \d \d \d).After:  \[(\d, \d, \d, \d)\]",
     re.DOTALL,
 )
+
 with open("inputs/16_1.input") as in_file:
     observations_strs = re.findall(observation_search, in_file.read())
 
 with open("inputs/16_2.input") as in_file:
-    instructions = [
-        list(map(int, x.split(" ")))
-        for x in re.findall(r"\d+ \d \d \d", in_file.read())
-    ]
-
-
-def split_int(seq, split_str=" "):
-    return list(int(c) for c in seq.split(split_str))
+    instructions = [split_int(x) for x in re.findall(r"\d+ \d \d \d", in_file.read())]
 
 
 observation = namedtuple("observation", ["before", "instruction", "after"])
@@ -101,17 +100,17 @@ class SIM(CPU):
         return SIM(self.mem).eval(op, A, B, C)
 
     def opcode_eval(self, op, A, B, C):
-        """opcode evaluation is patched in below after the mapping is worked out"""
+        # opcode evaluation is patched in below after the mapping is worked out
         pass
 
     def __repr__(self):
         return str(self.mem)
 
     def __eq__(self, other):
-        if type(other) == list:
-            return self.mem == other
-        else:
+        if hasattr(other, "mem"):
             return self.mem == other.mem
+        else:
+            return self.mem == other
 
 
 matching_operations_per_observation = list()
@@ -132,9 +131,8 @@ while any(len(names) != 1 for names in opcodes.values()):
     for code in opcodes.keys():
         if code not in removed_matches and len(opcodes[code]) == 1:
             for code_j in opcodes.keys():
-                if code_j == code:
-                    continue
-                opcodes[code_j] -= opcodes[code]
+                if code_j != code:
+                    opcodes[code_j] -= opcodes[code]
             removed_matches.append(code)
 opcodes = {code: names.pop() for code, names in opcodes.items()}
 

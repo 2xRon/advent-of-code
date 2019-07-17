@@ -4,8 +4,9 @@ Day 19: Go with the Flow
 """
 
 import re
-from collections import Counter, namedtuple
+from collections import Counter, namedtuple, deque
 from copy import copy
+from itertools import chain, combinations
 
 
 class CPU:
@@ -91,6 +92,14 @@ class SIM(CPU):
             self.eval(inst.op, *inst.args)
         return self
 
+    def iter_run_program(self, program):
+        self.ip_reg = program.ip_reg
+        prog_len = len(program.instructions)
+        while self.ip_val < prog_len:
+            inst = program.instructions[self.ip_val]
+            self.eval(inst.op, *inst.args)
+            yield self
+
     def __repr__(self):
         return f"mem: {self.mem}, ip_reg: {self.ip_reg}, ip_val: {self.ip_val}"
 
@@ -103,22 +112,95 @@ class SIM(CPU):
         else:
             return self.mem == other
 
-Program = namedtuple('Program',['ip_reg','instructions'])
-Instruction = namedtuple('Instruction',['op','args'])
+
+Program = namedtuple("Program", ["ip_reg", "instructions"])
+Instruction = namedtuple("Instruction", ["op", "args"])
 instruction_pattern = re.compile(r"(\w+) (\d+) (\d+) (\d+)")
 with open("inputs/19.input") as in_file:
-    ip_reg = re.match(r"#ip (\d)",in_file.readline()).group(1)
+    ip_reg = re.match(r"#ip (\d)", in_file.readline()).group(1)
     instructions = [re.match(instruction_pattern, l) for l in in_file.readlines()]
 
-instructions = [Instruction(m.group(1),list(map(int,m.group(2,3,4)))) for m in instructions]
+instructions = [
+    Instruction(m.group(1), list(map(int, m.group(2, 3, 4)))) for m in instructions
+]
 
-program = Program(int(ip_reg),instructions)
+program = Program(int(ip_reg), instructions)
 
 my_cpu = SIM()
 my_cpu.run_program(program)
 print("Part 1:", my_cpu.mem[0])
 
-my_cpu = SIM([1,0,0,0,0,0])
-my_cpu.run_program(program, verbose=True)
-print("Part 2:", my_cpu)
+# find constant value and calc its factor sum
+MEMORY_LEN = 100
+register_memory = [deque(maxlen=MEMORY_LEN) for _ in range(6)]
 
+
+def add_to_memory(register_memory, mem):
+    for idx, val in enumerate(mem):
+        register_memory[idx].append(val)
+
+
+def get_repeating_val(register_memory):
+    for last_register_vals in register_memory:
+        if last_register_vals.count(last_register_vals[0]) == MEMORY_LEN:
+            return last_register_vals[0]
+    else:
+        raise IndexError
+
+
+add_to_memory(register_memory, [-1] * 6)  # initialize with nonsense value
+for state in SIM([1, 0, 0, 0, 0, 0]).iter_run_program(program):
+    add_to_memory(register_memory, state.mem)
+    print(state)
+    try:
+        repeating_val = get_repeating_val(register_memory)
+    except IndexError:
+        continue
+    break
+
+
+def sieveE(n: int):
+    """return a lit of primes below n"""
+    prime = [False, False, False] + [True, False] * (n // 2)
+    result = [2]
+    append = result.append
+    sqrt_n = (int(n ** 0.5) + 1) | 1
+    for p in range(3, sqrt_n, 2):
+        if prime[p]:
+            append(p)
+            for i in range(p * p, n, 2 * p):
+                prime[i] = False
+    for p in range(sqrt_n, n, 2):
+        if prime[p]:
+            append(p)
+    return result
+
+
+def get_multip(p, val):
+    multip = 1
+    while multip * p <= val:
+        multip += 1
+    return multip - 1
+
+
+primes_below_half = sieveE(repeating_val // 2 + 1)
+prime_factorization = []
+v = repeating_val
+for p in primes_below_half:
+    while v % p == 0:
+        prime_factorization.append(p)
+        v /= p
+
+
+def product(seq):
+    res = 1
+    for x in seq:
+        res *= x
+    return res
+
+
+factor_combinations = chain.from_iterable(
+    combinations(prime_factorization, r) for r in range(len(prime_factorization) + 1)
+)
+factors = set(product(x) for x in factor_combinations)
+print("Part 2:", sum(factors))

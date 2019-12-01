@@ -3,6 +3,7 @@
 import os
 import requests
 import sys
+import re
 
 
 def inp(cookie: str, day: int, year: int = 2019):
@@ -24,11 +25,29 @@ def inp(cookie: str, day: int, year: int = 2019):
 
     return data.text
 
+def prep_file(day: int, year: int=2019):
+    url = f"https://adventofcode.com/{year}/day/{day}"
+    data = requests.get(url)
+
+    if data.status_code != 200:
+        raise Exception(data.text)
+    title = re.search(r"--- Day \d+: (.+) ---",data.text,re.DOTALL).group(1)
+    filename = f"{day:02d}"+"_"+title.replace(" ","_").lower()+".py"
+    path = os.path.join(os.path.dirname(__file__), filename)
+    if os.path.exists(path):
+        print(f"Day {day} file already exists.")
+        return
+    with open(path,'w') as out_file:
+        out_file.write(f'""" AOC {year}\n')
+        out_file.write(f'Day {day}: {title}\n')
+        out_file.write('Solution by 2xRon"""\n')
+
 
 if __name__ == "__main__":
     # fug u jdartz
     session_cookie = open("COOKIE.secret", "r").read().strip()
     if len(sys.argv) == 2:
         inp(session_cookie, int(sys.argv[1]))
+        prep_file(int(sys.argv[1]))
     elif len(sys.argv) == 3:
         inp(int(session_cookie, sys.argv[1]), int(sys.argv[2]))

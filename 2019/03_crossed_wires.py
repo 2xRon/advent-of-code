@@ -5,10 +5,7 @@ Solution by 2xRon
 """
 
 with open("inputs/03.input") as in_file:
-    wire_paths = [x.split(",") for x in in_file.readlines()]
-
-wireA = wire_paths[0]
-wireB = wire_paths[1]
+    wireA, wireB = [x.split(",") for x in in_file.readlines()]
 
 
 def get_direction(step):
@@ -21,7 +18,7 @@ def get_direction(step):
     elif step.startswith("R"):
         return 0 + 1j
     else:
-        raise ("Bad get_direction")
+        raise Exception("Bad get_direction")
 
 
 def trace_wire_pos(wire_path):
@@ -41,16 +38,13 @@ wireB_pos = trace_wire_pos(wireB)
 
 # find intersections
 common_locs = set(wireA_pos).intersection(set(wireB_pos))
-sorted_mhtn_dists_common = sorted(int(abs(x.real) + abs(x.imag)) for x in common_locs)
-print("Part 1:", sorted_mhtn_dists_common[0])
+min_mhtn_dists_common = min(int(abs(x.real) + abs(x.imag)) for x in common_locs)
+print("Part 1:", min_mhtn_dists_common)
 
 # find shortest summed path to an intersection
-intersections_by_path_len = []
+path_len_to_intersections = []
 for intersection in common_locs:
     wireA_intersection_len = wireA_pos.index(intersection) + 1  # removed origin
     wireB_intersection_len = wireB_pos.index(intersection) + 1
-    intersections_by_path_len.append(
-        (wireA_intersection_len + wireB_intersection_len, intersection)
-    )
-sorted_int_path = sorted(intersections_by_path_len, key=lambda x: x[0])[0]
-print("Part 2:", sorted_int_path[0])
+    path_len_to_intersections.append(wireA_intersection_len + wireB_intersection_len)
+print("Part 2:", min(path_len_to_intersections))

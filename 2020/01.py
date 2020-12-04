@@ -4,7 +4,7 @@ Day 1:
 Solution by 2xRon
 """
 
-with open('./input/01.input') as in_file:
+with open("./input/01.input") as in_file:
     nums = [int(x) for x in in_file.read().strip().splitlines()]
 # assuming all distinct
 

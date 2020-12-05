@@ -19,7 +19,7 @@ required_keys = ("byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid")
 
 
 def is_present(p: Dict[str, str]) -> bool:
-    return sum(k in p for k in required_keys) == len(required_keys)
+    return all(k in p for k in required_keys)
 
 
 valid_passports_one = sum(is_present(p) for p in passports)

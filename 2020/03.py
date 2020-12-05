@@ -4,6 +4,7 @@ Day 3: Toboggan Trajectory
 Solution by 2xRon
 """
 from typing import List, Tuple
+from math import gcd
 from itertools import count
 
 with open("./input/03.input") as in_file:
@@ -15,14 +16,6 @@ def is_tree(forest: List[List[bool]], pos: Tuple[int, int]) -> bool:
     return forest[pos[0]][pos[1] % pattern_width]
 
 
-slope_one = (1, 3)
-tree_count_one = sum(
-    is_tree(forest, pos)
-    for pos in zip(range(0, len(forest), slope_one[0]), count(0, slope_one[1]))
-)
-print("Part 1:", tree_count_one)
-
-
 def tree_count(forest: List[List[bool]], slope: Tuple[int, int]) -> int:
     return sum(
         is_tree(forest, pos)
@@ -30,8 +23,12 @@ def tree_count(forest: List[List[bool]], slope: Tuple[int, int]) -> int:
     )
 
 
+slope_one = (1, 3)
+print("Part 1:", tree_count(forest, slope_one))
+
 slopes = [(1, 1), (1, 3), (1, 5), (1, 7), (2, 1)]
 tot = 1
 for s in slopes:
-    tot *= tree_count(forest, s)
+    f = gcd(s[0], s[1])
+    tot *= tree_count(forest, (s[0] // f, s[1] // f))
 print("Part 2:", tot)

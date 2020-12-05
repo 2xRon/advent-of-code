@@ -19,10 +19,7 @@ def seat(row_string):
 
 
 with open("./input/05.input") as in_file:
-    seats = [seat(s) for s in in_file.readlines()]
-    max_seat = max(seats)
-    print("Part 1:", max_seat)
-    for ii in range(seat("FFFFFFFRRR"), seat("BBBBBBBLLL")):
-        if ii not in seats:
-            if (ii - 1 in seats) and (ii + 1 in seats):
-                print("Part 2:", ii)
+    seats = set(seat(s) for s in in_file.readlines())
+    print("Part 1:", max(seats))
+    missing_seat = seats.symmetric_difference(set(range(min(seats), max(seats)+1)))
+    print("Part 2:", tuple(missing_seat)[0])

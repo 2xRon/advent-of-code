@@ -8,8 +8,6 @@ from copy import copy
 
 
 class TwoIntTwoCode:
-    inst = {"acc": "_acc", "jmp": "_jmp", "nop": "_nop"}
-
     def __init__(self, program):
         self.acc = 0
         self.program = program
@@ -60,8 +58,9 @@ class TwoIntTwoCode:
 
     def _executeInstruction(self, instruction):
         op = instruction[0]
-        param = instruction[1] if len(instruction) > 1 else 0
-        getattr(TwoIntTwoCode, self.inst[op])(self, param)
+        param = instruction[1]
+        # getattr(TwoIntTwoCode, "_" + op)(self, param)
+        self.__dict__["_" + op](self, param)
 
     def _acc(self, param):
         self.acc += param
@@ -76,9 +75,8 @@ class TwoIntTwoCode:
 
 if __name__ == "__main__":
     with open("./input/08.input") as in_file:
-        program = [
-            tuple(((i := l.split(" "))[0], int(i[1]))) for l in in_file.readlines()
-        ]
+        program = [ tuple(l.split(" ")) for l in in_file.readlines() ]
+        program = [ (i[0], int(i[1])) for i in program ]
 
     Halterator = TwoIntTwoCode(program)
     Halterator.SolveOne()
